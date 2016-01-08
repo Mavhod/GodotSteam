@@ -5,8 +5,6 @@ For Windows and Linux platform.
 
 APIs for steam I will add it later.
 
-For Windows I quite not test yet, maybe it has a tiny issue.
-
 How to use
 ----------
 - Download Steamworks SDK.
@@ -34,7 +32,9 @@ How to use
   ```
 - Drop the "godotsteam" directory inside the "modules" directory on the Godot source. Recompile for your platform.
 
-  For Linux we must add ```openssl=no``` when compile because it has problem with lib crypto (class StreamPeerSSL may can't use)
+  For Linux you must add ```openssl=no``` when compile because it has problem with lib crypto (class StreamPeerSSL may can't use).
+  
+  For Windows you can only compile with Visual C++ can not use MINGW because *.lib is exclusive for Microsoft compiler.
 
 - Copy shared library (steam_api) to godot binary place, should look like this:
 
