@@ -21,7 +21,12 @@ def configure(env):
 			env.Append(LINKFLAGS=["steam_api.lib"])
 			env.Append(LIBPATH=["#modules/godotsteam/sdk/redistributable_bin"])
 		elif env["bits"]=="64":
-			env.Append(LINKFLAGS=["steam_api64.lib"])
-			env.Append(LIBPATH=["#modules/godotsteam/sdk/redistributable_bin/win64"])
+			# use 64bit steam_api?
+			if (True): # Change to False if you have problems with "unresolved external symbols"
+				env.Append(LINKFLAGS=["steam_api64.lib"])
+				env.Append(LIBPATH=["#modules/godotsteam/sdk/redistributable_bin/win64"])
+			else:
+				env.Append(LINKFLAGS=["steam_api.lib"])
+				env.Append(LIBPATH=["#modules/godotsteam/sdk/redistributable_bin"])
 
 

@@ -5,6 +5,7 @@
 GodotSteam::GodotSteam()
 {
 	isInitSuccess = false;
+	steamUser = Ref<GSteamUser>(memnew(GSteamUser));
 }
 
 bool GodotSteam::init()
@@ -14,9 +15,19 @@ bool GodotSteam::init()
 	return isInitSuccess;
 }
 
+Ref<GSteamUser> GodotSteam::get_user()
+{
+	if (isInitSuccess && SteamUser() != steamUser->get_isteamuser())
+	{
+		steamUser->set_isteamuser( SteamUser() );
+	}
+	return steamUser;
+}
+
 void GodotSteam::_bind_methods()
 {
     ObjectTypeDB::bind_method("init",&GodotSteam::init);
+	ObjectTypeDB::bind_method("get_user",&GodotSteam::get_user);
 }
 
 GodotSteam::~GodotSteam()

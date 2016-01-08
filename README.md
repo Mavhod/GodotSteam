@@ -64,11 +64,27 @@ How to use
 
 API Reference
 -------------
+GodotSteam
 ```
 bool init()
 If success return true.
-```
 
+GSteamUser get_user()
+Returns current user.
+```
+GSteamUser
+```
+int get_id()
+Returns ID representated by 64bit unsigned int (Steam3 ID).
+
+bool is_logged()
+Returns true if the Steam client current has a live connection to the Steam servers.
+If false, it means there is no active connection due to either a networking issue on the local machine, or the Steam server is down/busy.
+The Steam client will automatically be trying to recreate the connection as often as possible.
+
+bool is_empty()
+Checks if GSteamUser contains any data.
+```
 License
 -------------
 MIT license
