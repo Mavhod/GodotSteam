@@ -69,21 +69,25 @@ GodotSteam
 bool init()
 If success return true.
 
-GSteamUser get_user()
-Returns current user.
-```
-GSteamUser
-```
-int get_id()
-Returns ID representated by 64bit unsigned int (Steam3 ID).
+bool is_steam_running()
+Checks if a local Steam client is running.
 
-bool is_logged()
+bool user_is_logged()
 Returns true if the Steam client current has a live connection to the Steam servers.
 If false, it means there is no active connection due to either a networking issue on the local machine, or the Steam server is down/busy.
 The Steam client will automatically be trying to recreate the connection as often as possible.
 
-bool is_empty()
-Checks if GSteamUser contains any data.
+int user_get_id()
+Returns ID representated by 64bit unsigned int (Steam3 ID).
+
+string user_get_name()
+Returns user nickname.
+
+int user_get_steam_level()
+Returns user Steam level.
+
+void user_set_server_info( int server_SteamID, string server_ip, int port)
+Updates info about server the user is playing on.
 ```
 License
 -------------

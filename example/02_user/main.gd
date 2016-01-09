@@ -4,13 +4,14 @@ extends Node
 
 func _ready():
 	var steam = GodotSteam.new()
-	# if we use .get_user() before init, it will be just empty GSteamUser
-	var user = steam.get_user()
-	print("Is 1. user empty? ",user.is_empty(),", ID:",user.get_id())
-	# Initialize Steam
 	steam.init()
-	user = steam.get_user()
-	print("Is 2. user empty? ",user.is_empty(),", ID:",user.get_id())
-	print("Logged on? ",user.is_logged())
+	print("Steam3 ID: ",steam.user_get_id())
+	print("Your nickname: ",steam.user_get_name())
+	print("Your steam level: ",steam.user_get_steam_level())
+	# After using function below, if someone clicks "Join game" on you, this server IP and port will be displayed
+	# First argument should be Server SteamID, I just used our SteamID for testing purpose
+	#
+	# user_set_server_info( int server_steamID, string server_ip, int port )
+	steam.user_set_server_info(steam.user_get_id(),"127.0.0.1",11234)
 
 

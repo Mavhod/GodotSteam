@@ -8,7 +8,6 @@
 void register_godotsteam_types()
 {
         ObjectTypeDB::register_type<GodotSteam>();
-		ObjectTypeDB::register_type<GSteamUser>();
 }
 
 void unregister_godotsteam_types()
