@@ -2,9 +2,10 @@
 #ifndef GODOTSTEAM_H
 #define GODOTSTEAM_H
 
-#include "reference.h"
+#include "object.h"
+//#include "globals.h"
 
-class GodotSteam: public Reference
+class Steam: public Object
 {
 public:
 	enum {
@@ -12,8 +13,9 @@ public:
 		
 		UNIVERSE_INVALID=0, UNIVERSE_PUBLIC=1, UNIVERSE_BETA=2, UNIVERSE_INTERNAL=3, UNIVERSE_DEV=4,
 	};
-	GodotSteam();
-	~GodotSteam();
+	static Steam* get_singleton();
+	Steam();
+	~Steam();
 	
 	bool init();
 	bool is_steam_running();
@@ -37,10 +39,12 @@ public:
 
 protected:
 	static void _bind_methods();
+	static Steam* singleton;
 
 private:
 	bool isInitSuccess;
-	OBJ_TYPE(GodotSteam, Reference);
+	OBJ_TYPE(Steam, Object);
+	OBJ_CATEGORY("Steam");
 };
 #endif // GODOTSTEAM_H
 

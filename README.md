@@ -3,12 +3,10 @@ Steam api for Godot game engine.
 
 For Windows and Linux platform.
 
-APIs for steam I will add it later.
 
 How to use
 ----------
-- Download Steamworks SDK.
-
+- Download [Steamworks SDK](https://partner.steamgames.com).
 - Copy:
 
   ```
@@ -34,7 +32,7 @@ How to use
 
   For Linux you must add ```openssl=no``` when compile because it has problem with lib crypto (class StreamPeerSSL may can't use).
   
-  For Windows you can only compile with Visual C++ can't use MINGW because *.lib is exclusive for Microsoft compiler.
+  For Windows it's highly advised to use Visual Studio. With some extra steps MinGW will work, but most likely with limited functionality.
 
 - Copy shared library (steam_api) to godot binary place, should look like this:
 
@@ -64,50 +62,50 @@ How to use
 
 API Reference
 -------------
-GodotSteam
+Steam
 ```
 bool init()
-  If success return true.
+	If success return true.
 
 bool is_steam_running()
-  Checks if a local Steam client is running.
+	Checks if a local Steam client is running.
 
 int get_appid()
-  Returns game Steam AppID
+	Returns game Steam AppID
 
 string get_userdata_path()
-  Returns steam userdata path ( something like "C:\Progam Files\Steam\userdata\<SteamID>\<AppID>\local" )
+	Returns steam userdata path ( something like "C:\Progam Files\Steam\userdata\<SteamID>\<AppID>\local" )
 
 bool user_is_logged()
-  Returns true if the Steam client current has a live connection to the Steam servers.
-  If false, it means there is no active connection due to either a networking issue on the local machine, or the Steam server is down/busy.
-  The Steam client will automatically be trying to recreate the connection as often as possible.
+	Returns true if the Steam client current has a live connection to the Steam servers.
+	If false, it means there is no active connection due to either a networking issue on the local machine, or the Steam server is down/busy.
+	The Steam client will automatically be trying to recreate the connection as often as possible.
 
 int user_get_id()
-  Returns ID representated by 64bit unsigned int (Steam3 ID).
+	Returns Steam account ID.
 
 string user_get_name()
-  Returns user nickname.
+	Returns user nickname.
 
 int user_get_steam_level()
-  Returns user Steam level.
+	Returns user Steam level.
 
 string user_get_profile_link()
-  Returns link to user's profile ( http://steamcommunity.com/profiles/[U:<universe>:<account_id>] )
+	Returns link to user's profile ( http://steamcommunity.com/profiles/[U:<universe>:<account_id>] )
 
 void user_set_server_info( int server_SteamID, string server_ip, int port)
-  Updates info about server the user is playing on.
+	Updates info about server the user is playing on.
 
 bool overlay_is_enabled()
-  Returns true if the overlay is running & the user can access it. The overlay process could take a few seconds to
-  start & hook the game process, so this function will initially return false while the overlay is loading.
+	Returns true if the overlay is running & the user can access it. The overlay process could take a few seconds to
+	start & hook the game process, so this function will initially return false while the overlay is loading.
 
 void overlay_set_notification_pos( int(0-3) pos )
-  Change position(corner) at which notifications (messages, etc.) will be displayed.
-  Constants: TOP_LEFT, TOP_RIGHT, BOT_LEFT, BOT_RIGHT.
+	Change position(corner) at which notifications (messages, etc.) will be displayed.
+	Constants: TOP_LEFT, TOP_RIGHT, BOT_LEFT, BOT_RIGHT.
 
 void overlay_open_url( string url )
-  Opens URL using Steam overlay web browser
+	Opens URL using Steam overlay web browser
 ```
 License
 -------------
