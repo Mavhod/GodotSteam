@@ -79,7 +79,7 @@ int get_appid()
 String get_userdata_path()
 	Returns steam userdata path ( something like "C:\Progam Files\Steam\userdata\<SteamID>\<AppID>\local" )
 
-void set_game_info( int server_SteamID, String server_ip, int port ) 
+void set_game_info( SteamID server, String server_ip, int port ) 
 	Updates info about server you are playing on.
 
 Array get_friends( int filter=NOT_OFFLINE )
@@ -101,7 +101,7 @@ void overlay_open( String type="" )
 	Opens Steam overlay. Optional types are (not case-sensitive), not all tested:
 	"Friends", "Community", "Players", "Settings", "OfficialGameGroup", "Stats", "Achievements".
 
-void overlay_open( String type="", SteamID user )
+void overlay_open_user( String type="", SteamID user )
 	Type "chat" can be opened for both `SteamUser` and `SteamGroup`. Valid types are:
 		"steamid", "chat", "jointrade", "stats", "achievements", 
 		"friendadd", "friendremove", "friendrequestaccept", "friendrequestignore"
