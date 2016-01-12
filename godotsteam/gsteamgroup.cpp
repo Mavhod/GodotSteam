@@ -33,7 +33,7 @@ void _SteamGroup::open_chat()
 	// SteamFriends()->OpenClanChatWindowInSteam( getCSteamID() );
 	// ^ This doesn't work for some reason
 	// Use Steam.overlay function then
-	Steam->get_singleton().overlay_open_user("chat",getCSteamID());
+	Steam::get_singleton()->overlay_open_user("chat",this);
 }
 
 

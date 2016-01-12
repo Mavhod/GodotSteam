@@ -46,6 +46,7 @@ String Steam::get_userdata_path()
 
 
 
+
 // --- Disabled: requires callbacks handling - without them might locally display incorrect nickname (Steam servers might not accept or receive new nickname)
 // Sets user nickname
 //void Steam::set_username(const String& new_name)
@@ -70,6 +71,7 @@ void Steam::user_set_game_info(Ref<SteamID> gameserver, const String& server_ip,
 //	printf("IP int: %ld",addr.host);
 	SteamUser()->AdvertiseGame(gameserver->getCSteamID(), addr.host, port); 
 }
+
 
 
 // Returns friends array filtered by given filtered
@@ -120,6 +122,7 @@ void Steam::updateGroupList()
 		groupList.push_back(next_group);
 	}
 }
+
 
 // Returns true if the overlay is running & the user can access it. The overlay process could take a few seconds to
 // start & hook the game process, so this function will initially return false while the overlay is loading.
