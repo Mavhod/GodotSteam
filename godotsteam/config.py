@@ -18,6 +18,7 @@ def configure(env):
 			env.Append(LIBPATH=["#modules/godotsteam/sdk/redistributable_bin/linux64"])
 	elif env["platform"] == "windows":
 		if env["bits"]=="32":
+			#env.Append(LIBS=["steam_api"])
 			env.Append(LINKFLAGS=["steam_api.lib"])
 			env.Append(LIBPATH=["#modules/godotsteam/sdk/redistributable_bin"])
 		elif env["bits"]=="64":

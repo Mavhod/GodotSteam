@@ -20,6 +20,7 @@ public:
 	static Steam* get_singleton();
 	Steam();
 	~Steam();
+
 	
 	
 	Ref<_SteamUser> get_user();
@@ -54,6 +55,9 @@ private:
 	Array friendList;
 	Array groupList;
 	int lastFriendsFilter=ALL;
+
+private:
+	bool isInitSuccess;
 	OBJ_TYPE(Steam, Object);
 	OBJ_CATEGORY("Steam");
 };
