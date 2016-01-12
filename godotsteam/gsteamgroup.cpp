@@ -1,5 +1,6 @@
 
 #include "gsteamgroup.h"
+#include "godotsteam.h"
 
 _SteamGroup::_SteamGroup(CSteamID cSID)
 {
@@ -26,11 +27,13 @@ bool _SteamGroup::has_tag()
 	return (get_tag() != "");
 }
 
-
 void _SteamGroup::open_chat()
 {
 	if ( SteamFriends() == NULL ) { return; }
-	SteamFriends()->OpenClanChatWindowInSteam( getCSteamID() );
+	// SteamFriends()->OpenClanChatWindowInSteam( getCSteamID() );
+	// ^ This doesn't work for some reason
+	// Use Steam.overlay function then
+	Steam->get_singleton().overlay_open_user("chat",getCSteamID());
 }
 
 

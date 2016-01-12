@@ -130,15 +130,15 @@ int _SteamUser::get_relationship()
 
 void _SteamUser::_bind_methods()
 {
-	ObjectTypeDB::bind_method("is_logged",&_SteamUser::is_logged);
-	ObjectTypeDB::bind_method("is_friend",&_SteamUser::is_friend);
-	ObjectTypeDB::bind_method("get_user_type",&_SteamUser::get_user_type);
 	ObjectTypeDB::bind_method("get_name",&_SteamUser::get_name);
 	ObjectTypeDB::bind_method("get_state",&_SteamUser::get_state);
 	ObjectTypeDB::bind_method("get_steamlevel",&_SteamUser::get_steamlevel);
+	ObjectTypeDB::bind_method("get_user_type",&_SteamUser::get_user_type);
 	ObjectTypeDB::bind_method(_MD("get_rich_presence","key"),&_SteamUser::get_rich_presence);
 	ObjectTypeDB::bind_method(_MD("set_rich_presence","key","value"),&_SteamUser::set_rich_presence);
 	ObjectTypeDB::bind_method(_MD("clear_rich_presence"),&_SteamUser::clear_rich_presence);
+	ObjectTypeDB::bind_method("is_friend",&_SteamUser::is_friend);
+	ObjectTypeDB::bind_method("is_logged",&_SteamUser::is_logged);
 	// ObjectTypeDB::bind_method(_MD("get_relationship"),&_SteamUser::get_relationship);
 	
 	BIND_CONSTANT(INVALID);

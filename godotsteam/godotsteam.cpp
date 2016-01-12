@@ -56,7 +56,7 @@ String Steam::get_userdata_path()
 //}
 
 // Set data to be replicated to friends so that they can join your game
-void Steam::user_set_server_info(Ref<SteamID> gameserver, const String& server_ip, int port)
+void Steam::user_set_game_info(Ref<SteamID> gameserver, const String& server_ip, int port)
 {
 	if ( SteamUser() == NULL ) { return; }
 	// resolve address and convert it to int (IP_Address) union
@@ -199,7 +199,7 @@ void Steam::_bind_methods()
 	ObjectTypeDB::bind_method("get_appid",&Steam::get_appid);
 	ObjectTypeDB::bind_method("get_userdata_path",&Steam::get_userdata_path);
 	
-	ObjectTypeDB::bind_method(_MD("set_server_info","SteamGameServer","server_ip","port"),&Steam::user_set_server_info);
+	ObjectTypeDB::bind_method(_MD("set_game_info","SteamGameServer","server_ip","port"),&Steam::user_set_game_info);
 
 	ObjectTypeDB::bind_method(_MD("get_friends","filter"),&Steam::friends_getall,DEFVAL(NOT_OFFLINE));
 	ObjectTypeDB::bind_method("get_groups",&Steam::groups_getall);

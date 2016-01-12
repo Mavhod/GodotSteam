@@ -30,7 +30,7 @@ public:
 	String get_userdata_path();
 	
 //	void set_username(const String& new_name);
-	void user_set_server_info(Ref<SteamID> gameserver, const String& server_ip, int port);
+	void user_set_game_info(Ref<SteamID> gameserver, const String& server_ip, int port);
 	
 	Array friends_getall( int filter=NOT_OFFLINE );
 	Array groups_getall();

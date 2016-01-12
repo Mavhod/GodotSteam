@@ -3,12 +3,10 @@ Steam api for Godot game engine.
 
 For Windows and Linux platform.
 
-APIs for steam I will add it later.
 
 How to use
 ----------
-- Download Steamworks SDK.
-
+- Download [Steamworks SDK](https://partner.steamgames.com).
 - Copy:
 
   ```
@@ -34,7 +32,7 @@ How to use
 
   For Linux you must add ```openssl=no``` when compile because it has problem with lib crypto (class StreamPeerSSL may can't use).
   
-  For Windows you can only compile with Visual C++ can't use MINGW because *.lib is exclusive for Microsoft compiler.
+  For Windows it's highly advised to use Visual Studio. With some extra steps MinGW will work, but most likely with limited functionality.
 
 - Copy shared library (steam_api) to godot binary place, should look like this:
 
@@ -64,50 +62,130 @@ How to use
 
 API Reference
 -------------
-GodotSteam
+Steam
 ```
 bool init()
-  If success return true.
+	Needs to be called in order for this module to work properly. Returns true if succeed.
 
 bool is_steam_running()
-  Checks if a local Steam client is running.
+	Checks if a local Steam client is running.
+
+SteamUser get_user()
+	Returns current Steam user (client).
 
 int get_appid()
-  Returns game Steam AppID
+	Returns game Steam AppID
 
-string get_userdata_path()
-  Returns steam userdata path ( something like "C:\Progam Files\Steam\userdata\<SteamID>\<AppID>\local" )
+String get_userdata_path()
+	Returns steam userdata path ( something like "C:\Progam Files\Steam\userdata\<SteamID>\<AppID>\local" )
 
-bool user_is_logged()
-  Returns true if the Steam client current has a live connection to the Steam servers.
-  If false, it means there is no active connection due to either a networking issue on the local machine, or the Steam server is down/busy.
-  The Steam client will automatically be trying to recreate the connection as often as possible.
+void set_game_info( int server_SteamID, String server_ip, int port ) 
+	Updates info about server you are playing on.
 
-int user_get_id()
-  Returns ID representated by 64bit unsigned int (Steam3 ID).
+Array get_friends( int filter=NOT_OFFLINE )
+	Returns Array of `SteamUser` from your friends list. List is filtered by given filter, which can be:
+	OFFLINE|ONLINE|BUSY|AWAY|SNOOZE|LF_TRADE|LF_PLAY|NOT_OFFLINE|ALL
 
-string user_get_name()
-  Returns user nickname.
-
-int user_get_steam_level()
-  Returns user Steam level.
-
-string user_get_profile_link()
-  Returns link to user's profile ( http://steamcommunity.com/profiles/[U:<universe>:<account_id>] )
-
-void user_set_server_info( int server_SteamID, string server_ip, int port)
-  Updates info about server the user is playing on.
+Array get_groups()
+	Returns Array of `SteamGroup`.
 
 bool overlay_is_enabled()
-  Returns true if the overlay is running & the user can access it. The overlay process could take a few seconds to
-  start & hook the game process, so this function will initially return false while the overlay is loading.
+	Returns true if the overlay is running & the user can access it. The overlay process could take a few seconds to
+	start & hook the game process, so this function will initially return false while the overlay is loading.
 
 void overlay_set_notification_pos( int(0-3) pos )
-  Change position(corner) at which notifications (messages, etc.) will be displayed.
-  Constants: TOP_LEFT, TOP_RIGHT, BOT_LEFT, BOT_RIGHT.
+	Change position(corner) at which notifications (messages, etc.) will be displayed.
+	Constants: TOP_LEFT, TOP_RIGHT, BOT_LEFT, BOT_RIGHT.
 
-void overlay_open_url( string url )
-  Opens URL using Steam overlay web browser
+void overlay_open( String type="" )
+	Opens Steam overlay. Optional types are (not case-sensitive), not all tested:
+	"Friends", "Community", "Players", "Settings", "OfficialGameGroup", "Stats", "Achievements".
+
+void overlay_open( String type="", SteamID user )
+	Type "chat" can be opened for both `SteamUser` and `SteamGroup`. Valid types are:
+		"steamid", "chat", "jointrade", "stats", "achievements", 
+		"friendadd", "friendremove", "friendrequestaccept", "friendrequestignore"
+	Barely tested.
+
+void overlay_open_url( String url )
+	Opens URL using Steam overlay web browser
+
+void overlay_open_store( int appID=0 )
+	Opens specified app store site. If invalid or none given, main Steam store site will open.
+```
+SteamID
+```
+bool is_valid()
+	Returns true if it's valid (got proper ID assigned).
+
+int get_steamID()
+	Returns SteamID.
+
+int get_accountID()
+	Returns AccountID. Usually the same as SteamID.
+
+int get_account_type()
+	Returns account type associated to this SteamID. 
+	Usually: TYPE_INDIVIDUAL|TYPE_GROUP|TYPE_CHAT|TYPE_GAMESERVER.
+
+int get_universe()
+	Returns associated universe. Probably always UNIVERSE_PUBLIC.
+
+String get_profile_url()
+	Returns string that can be used (using web browser) to open this user or group profile page.
+	Only valid for TYPE_INDIVIDUAL|TYPE_GROUP.
+```
+SteamUser (extends SteamID)
+`*` - means it works only for YOU, `**` - only for USER
+```
+String get_name()
+	Returns user nickname.
+
+int get_state()
+	Returns: OFFLINE|ONLINE|BUSY|AWAY|SNOOZE|LF_TRADE|LF_PLAY
+
+int user_get_steamlevel()
+	Returns user Steam level. 
+	It should work with USER but for me it is just returning -1.
+
+int get_user_type()
+	Returns: INVALID|YOU|USER
+
+String get_rich_presence( String key )
+* bool set_rich_presence( String key, String value )
+	Rich Presence data is automatically shared between friends who are in the same game
+	Each user has a set of Key/Value pairs
+	Up to 20 different keys can be set
+	There are two magic keys:
+			"status"  - string that will show up in the 'view game info' dialog in the Steam friends list
+			"connect" - string that contains the command-line for how a friend can connect to a game
+	get_rich_presence() returns an empty string "" if no value is set
+	set_rich_presence() using empty string "" deletes the key.
+
+bool clear_rich_presence()
+	Deletes all your rich_presence data.
+
+** bool is_friend()
+	Checks if this user is on your friend list.
+
+* bool is_logged()
+	Returns true if the Steam client current has a live connection to the Steam servers.
+	If false, it means there is no active connection due to either a networking issue on the local machine, or the Steam server is down/busy.
+	The Steam client will automatically be trying to recreate the connection as often as possible.
+```
+SteamGroup (SteamID)
+```
+String get_name()
+	Returns group name.
+
+bool has_tag()
+	True if get_tag() returns empty string.
+
+String get_tag()
+	Returns group tag.
+
+void open_chat()
+	Opens group chat in the overlay.
 ```
 License
 -------------
