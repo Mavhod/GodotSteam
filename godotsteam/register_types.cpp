@@ -3,13 +3,27 @@
 
 #include "register_types.h"
 #include "object_type_db.h"
+
 #include "godotsteam.h"
+
+#include "globals.h"
+
+static Steam* SteamPtr = NULL;
+
 
 void register_godotsteam_types()
 {
-        ObjectTypeDB::register_type<GodotSteam>();
+	SteamPtr = memnew(Steam);
+	
+	Globals::get_singleton()->add_singleton(Globals::Singleton("Steam",Steam::get_singleton()));
+	
+	ObjectTypeDB::register_virtual_type<Steam>();
+	//ObjectTypeDB::register_type<SteamID>();
+	ObjectTypeDB::register_virtual_type<_SteamUser>();
+	ObjectTypeDB::register_virtual_type<_SteamGroup>();
 }
 
 void unregister_godotsteam_types()
 {
+	memdelete(SteamPtr);
 }
