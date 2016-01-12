@@ -162,13 +162,13 @@ String get_rich_presence( String key )
 	get_rich_presence() returns an empty string "" if no value is set
 	set_rich_presence() using empty string "" deletes the key.
 
-bool clear_rich_presence()
+* bool clear_rich_presence()
 	Deletes all your rich_presence data.
 
 ** bool is_friend()
 	Checks if this user is on your friend list.
 
-* bool is_logged()
+* bool is_logged() - probably will get moved to `Steam`
 	Returns true if the Steam client current has a live connection to the Steam servers.
 	If false, it means there is no active connection due to either a networking issue on the local machine, or the Steam server is down/busy.
 	The Steam client will automatically be trying to recreate the connection as often as possible.
