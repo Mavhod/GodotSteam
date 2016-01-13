@@ -193,6 +193,8 @@ Ref<_SteamUser> Steam::get_user()
 
 void Steam::_bind_methods()
 {
+	ObjectTypeDB::bind_method("run_callbacks",&Steam::run_callbacks);
+	
     ObjectTypeDB::bind_method("init",&Steam::init);
 	ObjectTypeDB::bind_method("is_steam_running",&Steam::is_steam_running);
 	ObjectTypeDB::bind_method("get_user",&Steam::get_user);
@@ -220,6 +222,8 @@ void Steam::_bind_methods()
 	BIND_CONSTANT(BUSY); // ...
 	BIND_CONSTANT(AWAY);
 	BIND_CONSTANT(SNOOZE);
+	BIND_CONSTANT(LF_TRADE);
+	BIND_CONSTANT(LF_PLAY);
 	BIND_CONSTANT(NOT_OFFLINE); // custom - 7
 	BIND_CONSTANT(ALL); // custom - 8
 

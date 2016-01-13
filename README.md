@@ -70,6 +70,10 @@ bool init()
 bool is_steam_running()
 	Checks if a local Steam client is running.
 
+void run_callbacks()
+	This is required for many functions to work properly (f.e. for users to emit "avatar_loaded" signal).
+	It should be called at least few times a second. Recommended to use it inside "_process".
+
 SteamUser get_user()
 	Returns current Steam user (client).
 
@@ -144,6 +148,13 @@ String get_name()
 int get_state()
 	Returns: OFFLINE|ONLINE|BUSY|AWAY|SNOOZE|LF_TRADE|LF_PLAY
 
+bool load_avatar()
+	Loads user avatar. After avatar gets loaded, signal "avatar_loaded", containing 2 arguments -
+	size and avatar as `Image`, will be emitted.
+	Returns false if avatar won't be loaded (probably only if: invalid size given or steam api not working)
+	Valid sizes: AVATAR_SMALL|AVATAR_MEDIUM|AVATAR_LARGE
+					(32x32)		(64x64)		 (184x184)
+
 int user_get_steamlevel()
 	Returns user Steam level. 
 	It should work with USER but for me it is just returning -1.
@@ -179,7 +190,7 @@ String get_name()
 	Returns group name.
 
 bool has_tag()
-	True if get_tag() returns empty string.
+	False if get_tag() returns empty string.
 
 String get_tag()
 	Returns group tag.

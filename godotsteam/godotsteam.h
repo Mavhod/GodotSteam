@@ -49,6 +49,10 @@ protected:
 	void updateGroupList();
 
 private:
+	// temporary (i hope)
+	void run_callbacks() { SteamAPI_RunCallbacks(); }
+	//
+
 	bool isInitSuccess;
 	Ref<_SteamUser> yourUser = NULL;
 	Array friendList;

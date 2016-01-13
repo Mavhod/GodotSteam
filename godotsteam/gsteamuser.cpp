@@ -1,10 +1,11 @@
 
 #include "gsteamuser.h"
 
+
 _SteamUser::_SteamUser(CSteamID cSID)
 {
 	setCSteamID( cSID );
-	// try to find its type
+	// _steamid_changed() => updateType() = try to find its type
 }
 
 bool _SteamUser::updateType()
@@ -57,12 +58,12 @@ int _SteamUser::get_state()
 
 int _SteamUser::get_steamlevel()
 {
-	if ( SteamUser() == NULL ) { return 0; }
+	if ( SteamUser() == NULL ) { return -1; }
 	if ( get_user_type() == YOU )
 	{ return SteamUser()->GetPlayerSteamLevel(); }
 	else if ( get_user_type() == USER )
 	{ return SteamFriends()->GetFriendSteamLevel( getCSteamID() ); }
-	return 0;
+	return -1;
 }
 
 bool _SteamUser::is_logged()
@@ -128,18 +129,135 @@ int _SteamUser::get_relationship()
 	return REL_NONE;
 }
 
+void _SteamUser::request_rich_presence()
+{
+	if ( SteamFriends() == NULL || get_user_type() != USER ) { return; }
+	SteamFriends()->RequestFriendRichPresence( getCSteamID() );
+}
+
+void _SteamUser::_rich_presence_received( FriendRichPresenceUpdate_t* rich_update )
+{
+	if ( rich_update->m_steamIDFriend == getCSteamID() )
+		emit_signal("rich_presence_rec");
+}
+
+Image _SteamUser::draw_avatar(int iSize, uint8* iBuffer) 
+{
+	// Apply buffer to Image
+	Image avatar(iSize,iSize,false,Image::FORMAT_RGBA);
+	for(int y=0;y<iSize;y++)
+	{
+		for(int x=0;x<iSize;x++)
+		{
+			int i = 4*(x+y*iSize);
+			float r = float(iBuffer[i])/255;
+			float g = float(iBuffer[i+1])/255;
+			float b = float(iBuffer[i+2])/255;
+			float a = float(iBuffer[i+3])/255;
+			avatar.put_pixel(x,y, Color(r,g,b,a) );
+		}
+	}
+	return avatar;
+}
+
+void _SteamUser::_avatar_loaded( AvatarImageLoaded_t* avatarData )
+{
+	if (avatarData->m_steamID != getCSteamID() ) { return; }
+	int size = avatarData->m_iWide;
+	// get img buffer
+	int buffSize = 4*size*size;
+	uint8* iBuffer = new uint8[buffSize];
+	bool success = SteamUtils()->GetImageRGBA(avatarData->m_iImage,iBuffer,buffSize);
+	if (!success)
+	{
+		printf("[Steam]Failed to load image buffer from callback\n");
+		return;
+	}
+	int rSize;
+	if (size == 32)
+		{ rSize = AVATAR_SMALL; }
+	else if (size == 64)
+		{ rSize = AVATAR_MEDIUM;}
+	else if (size == 184)
+		{ rSize = AVATAR_LARGE; }
+	else
+	{
+		printf("[Steam]Invalid avatar size from callback\n");
+		return;
+	}
+	Image avatar = draw_avatar(size,iBuffer);
+	call_deferred("emit_signal","avatar_loaded",rSize,avatar);
+}
+
+bool _SteamUser::load_avatar(int size)
+{
+	if (size<AVATAR_SMALL || size > AVATAR_LARGE) { return false; }
+	if ( SteamFriends() == NULL ) { return false; }
+	int iHandle=-2;
+	switch(size)
+	{
+		case AVATAR_SMALL:
+		{
+			iHandle = SteamFriends()->GetSmallFriendAvatar( getCSteamID() );
+			size = 32;
+			break;
+		}
+		case AVATAR_MEDIUM:
+		{
+			iHandle = SteamFriends()->GetMediumFriendAvatar( getCSteamID() );
+			size = 64;
+			break;
+		}
+		case AVATAR_LARGE:
+		{
+			iHandle = SteamFriends()->GetLargeFriendAvatar( getCSteamID() );
+			size = 184;
+			break;
+		}
+		default:
+			return false;
+	}
+	if ( iHandle <= 0 )
+	{
+		if ( iHandle == -1)
+		{
+			// inform that this one is still loading
+			return true;
+		}
+		// invalid handle
+		return false;
+	}
+	// already loaded
+
+	// simulate callback
+	AvatarImageLoaded_t* avatarData = new AvatarImageLoaded_t;
+	avatarData->m_steamID = getCSteamID();
+	avatarData->m_iImage = iHandle;
+	avatarData->m_iWide = size;
+	avatarData->m_iTall = size;
+	_avatar_loaded(avatarData);
+	free(avatarData);
+	return true;
+}
+
+
+
 void _SteamUser::_bind_methods()
 {
 	ObjectTypeDB::bind_method("get_name",&_SteamUser::get_name);
 	ObjectTypeDB::bind_method("get_state",&_SteamUser::get_state);
-	ObjectTypeDB::bind_method("get_steamlevel",&_SteamUser::get_steamlevel);
+	ObjectTypeDB::bind_method(_MD("load_avatar","size"),&_SteamUser::load_avatar,DEFVAL(AVATAR_MEDIUM));
 	ObjectTypeDB::bind_method("get_user_type",&_SteamUser::get_user_type);
 	ObjectTypeDB::bind_method(_MD("get_rich_presence","key"),&_SteamUser::get_rich_presence);
 	ObjectTypeDB::bind_method(_MD("set_rich_presence","key","value"),&_SteamUser::set_rich_presence);
 	ObjectTypeDB::bind_method(_MD("clear_rich_presence"),&_SteamUser::clear_rich_presence);
+	ObjectTypeDB::bind_method(_MD("request_rich_presence"),&_SteamUser::request_rich_presence);
 	ObjectTypeDB::bind_method("is_friend",&_SteamUser::is_friend);
 	ObjectTypeDB::bind_method("is_logged",&_SteamUser::is_logged);
 	// ObjectTypeDB::bind_method(_MD("get_relationship"),&_SteamUser::get_relationship);
+	
+	ADD_SIGNAL(MethodInfo("rich_presence_rec"));
+	ADD_SIGNAL(MethodInfo("avatar_loaded",PropertyInfo(Variant::INT,"size"),PropertyInfo(Variant::IMAGE,"avatar")));
 	
 	BIND_CONSTANT(INVALID);
 	BIND_CONSTANT(YOU);
@@ -152,5 +270,17 @@ void _SteamUser::_bind_methods()
 	BIND_CONSTANT(SNOOZE);
 	BIND_CONSTANT(LF_TRADE);
 	BIND_CONSTANT(LF_PLAY);
+	
+	BIND_CONSTANT(AVATAR_SMALL);
+	BIND_CONSTANT(AVATAR_MEDIUM);
+	BIND_CONSTANT(AVATAR_LARGE);
 }
+
+_SteamUser::~_SteamUser()
+{
+	
+}
+
+
+
 
