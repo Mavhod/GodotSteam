@@ -11,25 +11,46 @@
 			<array  len="0" shared="false">
 			</array>
 			<string> "names" </string>
-			<string_array  len="3">
+			<string_array  len="16">
 				<string> "Node" </string>
 				<string> "script/script" </string>
 				<string> "__meta__" </string>
+				<string> "Text" </string>
+				<string> "margin/left" </string>
+				<string> "margin/top" </string>
+				<string> "margin/right" </string>
+				<string> "margin/bottom" </string>
+				<string> "focus/ignore_mouse" </string>
+				<string> "focus/stop_mouse" </string>
+				<string> "size_flags/horizontal" </string>
+				<string> "size_flags/vertical" </string>
+				<string> "bbcode/enabled" </string>
+				<string> "bbcode/bbcode" </string>
+				<string> "visible_characters" </string>
+				<string> "RichTextLabel" </string>
 			</string_array>
 			<string> "node_count" </string>
-			<int> 1 </int>
+			<int> 2 </int>
 			<string> "node_paths" </string>
 			<array  len="0" shared="false">
 			</array>
 			<string> "nodes" </string>
-			<int_array  len="11"> 				-1, -1, 0, 0, -1, 2, 1, 0, 2, 1, 0 </int_array>
+			<int_array  len="40"> 				-1, -1, 0, 0, -1, 2, 1, 0, 2, 1, 0, 0, 0, 15, 3, -1, 11, 4, 2, 5, 2, 6, 3, 7, 4, 8, 5, 9, 6, 10, 7, 11, 7, 12, 5, 13, 8, 14, 9, 0 </int_array>
 			<string> "variants" </string>
-			<array  len="2" shared="false">
+			<array  len="10" shared="false">
 				<resource  external="0">  </resource>
 				<dictionary  shared="false">
 					<string> "__editor_plugin_screen__" </string>
 					<string> "Script" </string>
 				</dictionary>
+				<real> 40 </real>
+				<real> 1240 </real>
+				<real> 680 </real>
+				<bool> False </bool>
+				<bool> True </bool>
+				<int> 2 </int>
+				<string> "" </string>
+				<int> -1 </int>
 			</array>
 			<string> "version" </string>
 			<int> 2 </int>

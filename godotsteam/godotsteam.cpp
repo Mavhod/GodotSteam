@@ -37,14 +37,11 @@ int Steam::get_appid()
 String Steam::get_userdata_path()
 {
 	if ( SteamUser() == NULL ) { return ""; }
-	int cubBuffer = 256; // unsure if it represents char* size in SteamAPI
-	char *pchBuffer = new char[cubBuffer];
-	bool error = SteamUser()->GetUserDataFolder( pchBuffer, cubBuffer );
-	// is this needed? (memory freeing)
-	String path(pchBuffer);
-	free(pchBuffer);
-	// return String(pchBuffer);
-	return path;
+	const int cubBuffer = 256; // unsure if it represents char* size in SteamAPI
+	const char *pchBuffer = new const char[cubBuffer];
+	bool error = SteamUser()->GetUserDataFolder( (char*)pchBuffer, cubBuffer );
+	// ?error? handling?
+	return pchBuffer;
 }
 
 
@@ -59,7 +56,7 @@ String Steam::get_userdata_path()
 //}
 
 // Set data to be replicated to friends so that they can join your game
-void Steam::user_set_server_info(int host_id, const String& server_ip, int port)
+void Steam::user_set_game_info(Ref<SteamID> gameserver, const String& server_ip, int port)
 {
 	if ( SteamUser() == NULL ) { return; }
 	// resolve address and convert it to int (IP_Address) union
@@ -72,30 +69,59 @@ void Steam::user_set_server_info(int host_id, const String& server_ip, int port)
 		addr.field[3-i] = temp;
 	}
 //	printf("IP int: %ld",addr.host);
-	SteamUser()->AdvertiseGame(CSteamID(uint64(host_id)), addr.host, port); 
+	SteamUser()->AdvertiseGame(gameserver->getCSteamID(), addr.host, port); 
 }
 
 
 
 // Returns friends array filtered by given filtered
-Array Steam::friends_getall( int filter ) // default = 7 (NOT_OFFLINE)
+Array Steam::friends_getall( int filter ) // default = NOT_OFFLINE
 {
-	if ( SteamFriends() == NULL ) { return Array(); }
+	// If can't access SteamAPI then last generated list will be returned (stored in `friendList`)
+	updateFriendList(filter);
+	return friendList;
+}
+// this one probably will be called by some callbacks
+void Steam::updateFriendList(int filter)
+{
+	if ( SteamFriends() == NULL ) { return; }
+	// default filter = lastFriendsFilter
+	if ( filter == -1 ) { filter = lastFriendsFilter; }
 	// if filter out of range then filter = ALL
 	if ( filter<0 || filter>ALL ) { filter = ALL; }
-	int list_size = SteamFriends()->GetFriendCount(0x04); // "regular" friend 0x04 (see EFriendFlags)
-	Array list;
+	friendList.clear();
+	int list_size = SteamFriends()->GetFriendCount(0x04); // "regular" friend 0x04 (see sdk EFriendFlags)
 	for(int i=0;i<list_size;i++)
 	{
 		CSteamID f_steam_id = SteamFriends()->GetFriendByIndex( i, 0x04 ); // "regular" friend 0x04 (see EFriendFlags)
 		int f_state = int( SteamFriends()->GetFriendPersonaState(f_steam_id) );
 		if ( !(filter == ALL || filter == f_state || (filter==NOT_OFFLINE && f_state!=OFFLINE) ) ) 
 			{ continue; }
-		list.push_back(memnew(SteamFriend(f_steam_id)));
+		Ref<_SteamUser> new_friend = memnew( _SteamUser(f_steam_id) ); // ,_SteamUser::FRIEND
+		friendList.push_back(new_friend);
 	}
-	return list;
+	lastFriendsFilter = filter;
 }
 
+Array Steam::groups_getall() // default = NOT_OFFLINE
+{
+	// If can't access SteamAPI then last generated list will be returned (stored in `groupsList`)
+	updateGroupList();
+	return groupList;
+}
+// this one probably will be called by some callbacks
+void Steam::updateGroupList()
+{
+	if ( SteamFriends() == NULL ) { return; }
+	groupList.clear();
+	int list_size = SteamFriends()->GetClanCount();
+	for(int i=0;i<list_size;i++)
+	{
+		CSteamID g_steam_id = SteamFriends()->GetClanByIndex(i);
+		Ref<_SteamGroup> next_group = memnew( _SteamGroup(g_steam_id) );
+		groupList.push_back(next_group);
+	}
+}
 
 
 // Returns true if the overlay is running & the user can access it. The overlay process could take a few seconds to
@@ -136,7 +162,7 @@ void Steam::overlay_open(const String& url)
 void Steam::overlay_open_user(const String& url, Ref<SteamID> user)
 {
 	if ( SteamFriends() == NULL ) { return; }
-	SteamFriends()->ActivateGameOverlayToUser( url.utf8().get_data(), user->get_CSteamID() );
+	SteamFriends()->ActivateGameOverlayToUser( url.utf8().get_data(), user->getCSteamID() );
 	//SteamFriends()->ActivateGameOverlayToUser( url.utf8().get_data(), CSteamID(uint64(steam_id)) );
 }
 
@@ -154,32 +180,33 @@ void Steam::overlay_open_store(int app_id)
 	SteamFriends()->ActivateGameOverlayToStore( AppId_t(app_id), EOverlayToStoreFlag(0) );
 }
 
+
 Ref<_SteamUser> Steam::get_user()
 {
-	if ( SteamUser() == NULL ) { return memnew(_SteamUser(CSteamID())); }
-	CSteamID cSteamID = SteamUser()->GetSteamID();
-	_SteamUser* user = memnew(_SteamUser(cSteamID));
-	
-	return user;
+	if ( SteamFriends() != NULL && yourUser == NULL )
+	{
+		CSteamID cSteamID = SteamUser()->GetSteamID();
+		yourUser = Ref<_SteamUser>( memnew( _SteamUser(cSteamID) ) ); // ,_SteamUser::YOU
+	}
+	return yourUser;
 }
 
 void Steam::_bind_methods()
 {
-	
     ObjectTypeDB::bind_method("init",&Steam::init);
 	ObjectTypeDB::bind_method("is_steam_running",&Steam::is_steam_running);
 	ObjectTypeDB::bind_method("get_user",&Steam::get_user);
 	ObjectTypeDB::bind_method("get_appid",&Steam::get_appid);
 	ObjectTypeDB::bind_method("get_userdata_path",&Steam::get_userdata_path);
 	
-	ObjectTypeDB::bind_method(_MD("user_set_server_info","server_steamID","server_ip","port"),&Steam::user_set_server_info);
+	ObjectTypeDB::bind_method(_MD("set_game_info","SteamGameServer","server_ip","port"),&Steam::user_set_game_info);
 
-	ObjectTypeDB::bind_method(_MD("friends_get","filter"),&Steam::friends_getall,DEFVAL(NOT_OFFLINE));
-	
+	ObjectTypeDB::bind_method(_MD("get_friends","filter"),&Steam::friends_getall,DEFVAL(NOT_OFFLINE));
+	ObjectTypeDB::bind_method("get_groups",&Steam::groups_getall);
 	ObjectTypeDB::bind_method("overlay_is_enabled",&Steam::overlay_is_enabled);
 	ObjectTypeDB::bind_method(_MD("overlay_set_notification_pos","0-3"),&Steam::overlay_set_notify_pos);
 	ObjectTypeDB::bind_method(_MD("overlay_open","type"),&Steam::overlay_open,DEFVAL(""));
-	ObjectTypeDB::bind_method(_MD("overlay_open_user","type","User"),&Steam::overlay_open_user);
+	ObjectTypeDB::bind_method(_MD("overlay_open_user","type","SteamUser"),&Steam::overlay_open_user);
 	ObjectTypeDB::bind_method(_MD("overlay_open_url","url"),&Steam::overlay_open_url);
 	ObjectTypeDB::bind_method(_MD("overlay_open_store","appID"),&Steam::overlay_open_store,DEFVAL(0));
 	
@@ -211,6 +238,5 @@ Steam::~Steam()
 		//printf("Godot steam exit\n");
 		SteamAPI_Shutdown();
 	}
-	isInitSuccess = false;
 	singleton = NULL;
 }

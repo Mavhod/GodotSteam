@@ -18,8 +18,9 @@ void register_godotsteam_types()
 	Globals::get_singleton()->add_singleton(Globals::Singleton("Steam",Steam::get_singleton()));
 	
 	ObjectTypeDB::register_virtual_type<Steam>();
+	//ObjectTypeDB::register_type<SteamID>();
 	ObjectTypeDB::register_virtual_type<_SteamUser>();
-	ObjectTypeDB::register_virtual_type<SteamFriend>();
+	ObjectTypeDB::register_virtual_type<_SteamGroup>();
 }
 
 void unregister_godotsteam_types()
