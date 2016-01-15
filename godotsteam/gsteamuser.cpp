@@ -19,9 +19,7 @@ bool _SteamUser::updateType()
 	}
 	else if ( SteamFriends() != NULL )
 	{
-		if ( SteamFriends()->HasFriend(your_id,0x04) == true ) // "regular" friend
-		{ setUserType(USER); }
-		else if ( SteamFriends()->HasFriend(your_id,0x00) == false )
+		if ( SteamFriends()->HasFriend(your_id,0xFFFF) == true ) // 0x04 - "regular" friend, 0xFFFF - any (mostly friends+requests+blocked...)
 		{ setUserType(USER); }
 	}
 	return (old_type != get_user_type());
@@ -66,6 +64,7 @@ int _SteamUser::get_steamlevel()
 	return -1;
 }
 
+// moved to 'Steam'
 bool _SteamUser::is_logged()
 {
 	if ( SteamUser() == NULL ) { return false; }
@@ -75,18 +74,9 @@ bool _SteamUser::is_logged()
 	}
 	return false;
 }
+// ---
 
-bool _SteamUser::set_rich_presence(const String& s_key, const String& s_value)
-{
-	if ( SteamFriends() == NULL ) { return false; }
-	if ( get_user_type() == YOU )
-	{
-		return SteamFriends()->SetRichPresence(s_key.utf8().get_data(),s_value.utf8().get_data());
-	}
-	return false;
-}
-
-String _SteamUser::get_rich_presence(const String& s_key)
+String _SteamUser::get_game_info(const String& s_key)
 {
 	if ( SteamFriends() == NULL ) { return ""; }
 	if ( get_user_type() == YOU || get_user_type() == USER )
@@ -94,18 +84,6 @@ String _SteamUser::get_rich_presence(const String& s_key)
 		return SteamFriends()->GetFriendRichPresence(getCSteamID(), s_key.utf8().get_data());
 	}
 	return "";
-}
-
-// Cleans up all the keys
-bool _SteamUser::clear_rich_presence()
-{
-	if ( SteamFriends() == NULL ) { return false; }
-	if ( get_user_type() == YOU )
-	{
-		SteamFriends()->ClearRichPresence();
-		return true;
-	}
-	return false;	
 }
 
 // Checks if user is on your friends list
@@ -129,13 +107,13 @@ int _SteamUser::get_relationship()
 	return REL_NONE;
 }
 
-void _SteamUser::request_rich_presence()
+void _SteamUser::request_game_info()
 {
 	if ( SteamFriends() == NULL || get_user_type() != USER ) { return; }
 	SteamFriends()->RequestFriendRichPresence( getCSteamID() );
 }
 
-void _SteamUser::_rich_presence_received( FriendRichPresenceUpdate_t* rich_update )
+void _SteamUser::_game_info_received( FriendRichPresenceUpdate_t* rich_update )
 {
 	if ( rich_update->m_steamIDFriend == getCSteamID() )
 		emit_signal("rich_presence_rec");
@@ -236,8 +214,14 @@ bool _SteamUser::load_avatar(int size)
 	avatarData->m_iWide = size;
 	avatarData->m_iTall = size;
 	_avatar_loaded(avatarData);
-	free(avatarData);
+	delete avatarData;
 	return true;
+}
+
+void _SteamUser::set_played_with()
+{
+	if ( SteamFriends() == NULL ) { return; }
+	SteamFriends()->SetPlayedWith( getCSteamID() );
 }
 
 
@@ -245,18 +229,18 @@ bool _SteamUser::load_avatar(int size)
 void _SteamUser::_bind_methods()
 {
 	ObjectTypeDB::bind_method("get_name",&_SteamUser::get_name);
-	ObjectTypeDB::bind_method("get_state",&_SteamUser::get_state);
+	ObjectTypeDB::bind_method("get_status",&_SteamUser::get_state);
 	ObjectTypeDB::bind_method(_MD("load_avatar","size"),&_SteamUser::load_avatar,DEFVAL(AVATAR_MEDIUM));
 	ObjectTypeDB::bind_method("get_user_type",&_SteamUser::get_user_type);
-	ObjectTypeDB::bind_method(_MD("get_rich_presence","key"),&_SteamUser::get_rich_presence);
-	ObjectTypeDB::bind_method(_MD("set_rich_presence","key","value"),&_SteamUser::set_rich_presence);
-	ObjectTypeDB::bind_method(_MD("clear_rich_presence"),&_SteamUser::clear_rich_presence);
-	ObjectTypeDB::bind_method(_MD("request_rich_presence"),&_SteamUser::request_rich_presence);
+	ObjectTypeDB::bind_method("get_steamlevel",&_SteamUser::get_steamlevel);
+	ObjectTypeDB::bind_method("set_played_with",&_SteamUser::set_played_with);
+	ObjectTypeDB::bind_method(_MD("get_game_info","key"),&_SteamUser::get_game_info);
+	ObjectTypeDB::bind_method(_MD("request_game_info"),&_SteamUser::request_game_info);
 	ObjectTypeDB::bind_method("is_friend",&_SteamUser::is_friend);
-	ObjectTypeDB::bind_method("is_logged",&_SteamUser::is_logged);
+	// ObjectTypeDB::bind_method("is_logged",&_SteamUser::is_logged);
 	// ObjectTypeDB::bind_method(_MD("get_relationship"),&_SteamUser::get_relationship);
 	
-	ADD_SIGNAL(MethodInfo("rich_presence_rec"));
+	ADD_SIGNAL(MethodInfo("rpresence_updated"));
 	ADD_SIGNAL(MethodInfo("avatar_loaded",PropertyInfo(Variant::INT,"size"),PropertyInfo(Variant::IMAGE,"avatar")));
 	
 	BIND_CONSTANT(INVALID);

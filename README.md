@@ -148,7 +148,7 @@ String get_name()
 int get_state()
 	Returns: OFFLINE|ONLINE|BUSY|AWAY|SNOOZE|LF_TRADE|LF_PLAY
 
-bool load_avatar()
+bool load_avatar(int size)
 	Loads user avatar. After avatar gets loaded, signal "avatar_loaded", containing 2 arguments -
 	size and avatar as `Image`, will be emitted.
 	Returns false if avatar won't be loaded (probably only if: invalid size given or steam api not working)

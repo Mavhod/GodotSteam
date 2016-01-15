@@ -7,6 +7,7 @@
 #include "gsteamuser.h"
 #include "gsteamgroup.h"
 
+
 class Steam: public Object
 {
 public:
@@ -15,7 +16,9 @@ public:
 		
 		UNIVERSE_INVALID=0, UNIVERSE_PUBLIC=1, UNIVERSE_BETA=2, UNIVERSE_INTERNAL=3, UNIVERSE_DEV=4,
 		
-		OFFLINE=0, ONLINE=1, BUSY=2, AWAY=3, SNOOZE=4, LF_TRADE, LF_PLAY, STATE_MAX, NOT_OFFLINE=8, ALL=9
+		OFFLINE=0, ONLINE=1, BUSY=2, AWAY=3, SNOOZE=4, LF_TRADE, LF_PLAY, STATE_MAX, NOT_OFFLINE=8, ALL=9,
+		
+		ERR_NO_CLIENT=2, ERR_NO_CONNECTION=3,
 	};
 	static Steam* get_singleton();
 	Steam();
@@ -24,16 +27,21 @@ public:
 	
 	Ref<_SteamUser> get_user();
 	
-	bool init();
-	bool is_steam_running();
+	int init();
+	bool start_via_steam();
+		// bool is_running();
+		// bool got_connection();
 	int get_appid();
 	String get_userdata_path();
 	
 //	void set_username(const String& new_name);
-	void user_set_game_info(Ref<SteamID> gameserver, const String& server_ip, int port);
+	void user_set_server_info(Ref<SteamID> gameserver, const String& server_ip, int port);
+	bool set_game_info(const String& s_key, const String& s_value);
+	void clear_game_info();
 	
 	Array friends_getall( int filter=NOT_OFFLINE );
 	Array groups_getall();
+	Array get_recent_players();
 	
 	bool overlay_is_enabled();
 	void overlay_set_notify_pos(int pos);
@@ -49,6 +57,9 @@ protected:
 	void updateGroupList();
 
 private:
+	STEAM_CALLBACK(Steam,_server_connected,SteamServersConnected_t);
+	STEAM_CALLBACK(Steam,_server_disconnected,SteamServersDisconnected_t);
+	STEAM_CALLBACK(Steam,_overlay_toggled,GameOverlayActivated_t);
 	// temporary (i hope)
 	void run_callbacks() { SteamAPI_RunCallbacks(); }
 	//

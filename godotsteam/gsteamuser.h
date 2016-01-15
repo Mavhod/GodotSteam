@@ -33,24 +33,22 @@ public:
 	String get_name();
 	int get_state();
 	int get_steamlevel();
-	String get_rich_presence(const String& s_key);
+	String get_game_info(const String& s_key);
 	bool load_avatar(int size=AVATAR_MEDIUM);
 	// YOU
-	bool is_logged();
-	bool set_rich_presence(const String& s_key, const String& s_value);
-	bool clear_rich_presence();
+	bool is_logged(); // moved to 'Steam'
 	// USER
 	bool is_friend();
 		int get_relationship(); // not bound, probably only useful for stuff like invitations, messages. Check REL_ constants
-	void request_rich_presence();
-	void force_new_avatars();
+	void request_game_info();
+	void set_played_with();
 	
 
 protected:
 	int user_type=0;
 	void setUserType(int uType); // sets to INVALID if this type is undeclared
 	bool updateType(); // checks&update the type. Returns true if type changed. Mostly used when `cSteamID` changed
-	// void _rich_presence_received( FriendRichPresenceUpdate_t* rich_update );
+	// void _game_info_received( FriendRichPresenceUpdate_t* rich_update );
 	static void _bind_methods();
 
 private:
@@ -60,7 +58,7 @@ private:
 	
 	
 	// CALLBACKS TEST
-	STEAM_CALLBACK(_SteamUser, _rich_presence_received, FriendRichPresenceUpdate_t );
+	STEAM_CALLBACK(_SteamUser, _game_info_received, FriendRichPresenceUpdate_t );
 	STEAM_CALLBACK(_SteamUser, _avatar_loaded, AvatarImageLoaded_t );
 	
 	
