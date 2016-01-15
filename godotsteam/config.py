@@ -37,8 +37,6 @@ def configure(env):
 				if (use_64bit_lib):
 					steamlib += "64" # steam_api64
 					steamlib_path += "/win64" # .../sdk/redistributable_bin/win64
-				else: # use 32bit
-					steamlib += ".lib" # steam_api.lib
 			env.Append(LIBS=[ steamlib ])
 		
 		env.Append(LIBPATH=[ steamlib_path ])
