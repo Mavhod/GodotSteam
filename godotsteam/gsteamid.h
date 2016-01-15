@@ -39,11 +39,11 @@ public:
 
 protected:
 	static void _bind_methods();
-	virtual void _steamid_changed()=0;
 	CSteamID cSteamID;
 	OBJ_CATEGORY("Steam");
 
 private:
+	virtual void _steamid_changed()=0;
 	OBJ_TYPE(SteamID, Reference);
 };
 #endif

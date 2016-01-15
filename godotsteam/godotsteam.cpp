@@ -15,16 +15,20 @@ Steam::Steam()
 
 Steam* Steam::get_singleton() { return singleton; }
 
-bool Steam::init()
+int Steam::init()
 {
 	//printf("Godot steam init\n");
 	isInitSuccess = SteamAPI_Init();
-	return isInitSuccess;
-}
-
-bool Steam::is_steam_running()
-{
-	return SteamAPI_IsSteamRunning();
+	int err = FAILED;
+	if (isInitSuccess)
+		{ err = OK; }
+	
+	if ( !SteamAPI_IsSteamRunning() )
+		{ err = ERR_NO_CLIENT; }
+	else if ( !SteamUser()->BLoggedOn() )
+		{ err = ERR_NO_CONNECTION; }
+	
+	return err;
 }
 
 int Steam::get_appid()
@@ -56,7 +60,7 @@ String Steam::get_userdata_path()
 //}
 
 // Set data to be replicated to friends so that they can join your game
-void Steam::user_set_game_info(Ref<SteamID> gameserver, const String& server_ip, int port)
+void Steam::user_set_server_info(Ref<SteamID> gameserver, const String& server_ip, int port)
 {
 	if ( SteamUser() == NULL ) { return; }
 	// resolve address and convert it to int (IP_Address) union
@@ -97,10 +101,27 @@ void Steam::updateFriendList(int filter)
 		int f_state = int( SteamFriends()->GetFriendPersonaState(f_steam_id) );
 		if ( !(filter == ALL || filter == f_state || (filter==NOT_OFFLINE && f_state!=OFFLINE) ) ) 
 			{ continue; }
-		Ref<_SteamUser> new_friend = memnew( _SteamUser(f_steam_id) ); // ,_SteamUser::FRIEND
+		Ref<_SteamUser> new_friend = memnew( _SteamUser(f_steam_id) );
 		friendList.push_back(new_friend);
 	}
 	lastFriendsFilter = filter;
+}
+
+Array Steam::get_recent_players()
+{
+	if ( SteamFriends() == NULL ) { return Array(); }
+	Array uList;
+	int list_size = SteamFriends()->GetCoplayFriendCount();
+	for(int i=0;i<list_size;i++)
+	{
+		CSteamID uSteamID = SteamFriends()->GetCoplayFriend(i);
+		if ( SteamFriends()->GetFriendCoplayGame(uSteamID) == get_appid() ) // played the same game
+		{
+			Ref<_SteamUser> nextUser = memnew( _SteamUser(uSteamID) );
+			uList.push_back(nextUser);
+		}
+	}
+	return uList;
 }
 
 Array Steam::groups_getall() // default = NOT_OFFLINE
@@ -186,29 +207,66 @@ Ref<_SteamUser> Steam::get_user()
 	if ( SteamFriends() != NULL && yourUser == NULL )
 	{
 		CSteamID cSteamID = SteamUser()->GetSteamID();
-		yourUser = Ref<_SteamUser>( memnew( _SteamUser(cSteamID) ) ); // ,_SteamUser::YOU
+		yourUser = Ref<_SteamUser>( memnew( _SteamUser(cSteamID) ) );
 	}
 	return yourUser;
 }
 
+bool Steam::set_game_info(const String& s_key, const String& s_value)
+{
+	if ( SteamFriends() == NULL ) { return false; }
+	return SteamFriends()->SetRichPresence(s_key.utf8().get_data(),s_value.utf8().get_data());
+}
+
+// Cleans up all the keys
+void Steam::clear_game_info()
+{
+	if ( SteamFriends() == NULL ) { return; }
+	SteamFriends()->ClearRichPresence();
+}
+
+void Steam::_server_connected( SteamServersConnected_t* conData )
+	{ emit_signal("connection_changed",true); }
+void Steam::_server_disconnected( SteamServersDisconnected_t* conData )
+	{ emit_signal("connection_changed",false); }
+
+void Steam::_overlay_toggled( GameOverlayActivated_t* callData )
+{
+	if (callData->m_bActive)
+		{ emit_signal("overlay_toggled",true); }
+	else
+		{ emit_signal("overlay_toggled",false); }
+}
+
+
+
 void Steam::_bind_methods()
 {
     ObjectTypeDB::bind_method("init",&Steam::init);
-	ObjectTypeDB::bind_method("is_steam_running",&Steam::is_steam_running);
+	// ObjectTypeDB::bind_method("is_running",&Steam::is_running);
+	// ObjectTypeDB::bind_method("got_connection",&Steam::got_connection);
+	ObjectTypeDB::bind_method("run_callbacks",&Steam::run_callbacks);
 	ObjectTypeDB::bind_method("get_user",&Steam::get_user);
 	ObjectTypeDB::bind_method("get_appid",&Steam::get_appid);
 	ObjectTypeDB::bind_method("get_userdata_path",&Steam::get_userdata_path);
 	
-	ObjectTypeDB::bind_method(_MD("set_game_info","SteamGameServer","server_ip","port"),&Steam::user_set_game_info);
+	ObjectTypeDB::bind_method(_MD("set_server_info","SteamGameServer","server_ip","port"),&Steam::user_set_server_info);
+	ObjectTypeDB::bind_method(_MD("set_game_info","key","value"),&Steam::set_game_info);
+	ObjectTypeDB::bind_method(_MD("clear_game_info"),&Steam::clear_game_info);
 
 	ObjectTypeDB::bind_method(_MD("get_friends","filter"),&Steam::friends_getall,DEFVAL(NOT_OFFLINE));
 	ObjectTypeDB::bind_method("get_groups",&Steam::groups_getall);
+	ObjectTypeDB::bind_method("get_recent_players",&Steam::get_recent_players);
+	
 	ObjectTypeDB::bind_method("overlay_is_enabled",&Steam::overlay_is_enabled);
 	ObjectTypeDB::bind_method(_MD("overlay_set_notification_pos","0-3"),&Steam::overlay_set_notify_pos);
 	ObjectTypeDB::bind_method(_MD("overlay_open","type"),&Steam::overlay_open,DEFVAL(""));
 	ObjectTypeDB::bind_method(_MD("overlay_open_user","type","SteamUser"),&Steam::overlay_open_user);
 	ObjectTypeDB::bind_method(_MD("overlay_open_url","url"),&Steam::overlay_open_url);
 	ObjectTypeDB::bind_method(_MD("overlay_open_store","appID"),&Steam::overlay_open_store,DEFVAL(0));
+	
+	ADD_SIGNAL(MethodInfo("connection_changed",PropertyInfo(Variant::BOOL,"connected")));
+	ADD_SIGNAL(MethodInfo("overlay_toggled",PropertyInfo(Variant::BOOL,"active")));
 	
 	BIND_CONSTANT(TOP_LEFT);
 	BIND_CONSTANT(TOP_RIGHT);
@@ -220,8 +278,13 @@ void Steam::_bind_methods()
 	BIND_CONSTANT(BUSY); // ...
 	BIND_CONSTANT(AWAY);
 	BIND_CONSTANT(SNOOZE);
-	BIND_CONSTANT(NOT_OFFLINE); // custom - 7
-	BIND_CONSTANT(ALL); // custom - 8
+	BIND_CONSTANT(LF_TRADE);
+	BIND_CONSTANT(LF_PLAY);
+	BIND_CONSTANT(NOT_OFFLINE); // custom
+	BIND_CONSTANT(ALL); // custom
+	
+	BIND_CONSTANT(ERR_NO_CLIENT);
+	BIND_CONSTANT(ERR_NO_CONNECTION);
 
 
 //	BIND_CONSTANT(UNIVERSE_INVALID);
