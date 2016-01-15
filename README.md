@@ -64,11 +64,13 @@ API Reference
 -------------
 Steam
 ```
-bool init()
-	Needs to be called in order for this module to work properly. Returns true if succeed.
-
-bool is_steam_running()
-	Checks if a local Steam client is running.
+int init()
+	Needs to be called in order for this module to work properly. Returns:
+		OK - if everything initialized properly
+		FAILED - if initialization failed, nothing will work
+		ERR_NO_CLIENT - if there is no Steam client running, probably nothing will work
+		ERR_NO_CONNECTION - initialized, but can't connect to Steam servers.
+			Most of functionality will be restored once you connect (check "connection_changed" signal)
 
 void run_callbacks()
 	This is required for many functions to work properly (f.e. for users to emit "avatar_loaded" signal).
@@ -83,8 +85,19 @@ int get_appid()
 String get_userdata_path()
 	Returns steam userdata path ( something like "C:\Progam Files\Steam\userdata\<SteamID>\<AppID>\local" )
 
-void set_game_info( SteamID server, String server_ip, int port ) 
+void set_server_info( SteamID server, String server_ip, int port ) 
 	Updates info about server you are playing on.
+
+void set_game_info( String key, String value )
+	This data is automatically shared between friends who are in the same game
+	Each user has a set of Key/Value pairs. Up to 20 different keys can be set
+	There are two magic keys:
+			"status"  - string that will show up in the 'view game info' dialog in the Steam friends list
+			"connect" - string that contains the command-line for how a friend can connect to a game
+	Use empty string "" to erase the key.
+
+bool clear_game_info()
+	Erases all data set.
 
 Array get_friends( int filter=NOT_OFFLINE )
 	Returns Array of `SteamUser` from your friends list. List is filtered by given filter, which can be:
@@ -92,6 +105,9 @@ Array get_friends( int filter=NOT_OFFLINE )
 
 Array get_groups()
 	Returns Array of `SteamGroup`.
+
+Array get_recent_players()
+	Returns users you recently played this game with. 
 
 bool overlay_is_enabled()
 	Returns true if the overlay is running & the user can access it. The overlay process could take a few seconds to
@@ -116,6 +132,14 @@ void overlay_open_url( String url )
 
 void overlay_open_store( int appID=0 )
 	Opens specified app store site. If invalid or none given, main Steam store site will open.
+
+
+
+Signals:
+overlay_toggled( bool active )
+	Emmited when Steam overlay is opened or closed.
+connection_changed( bool connected )
+	Emmited when connection to Steam servers is lost or renewed.
 ```
 SteamID
 ```
@@ -140,7 +164,6 @@ String get_profile_url()
 	Only valid for TYPE_INDIVIDUAL|TYPE_GROUP.
 ```
 SteamUser (extends SteamID)
-`*` - means it works only for YOU, `**` - only for USER
 ```
 String get_name()
 	Returns user nickname.
@@ -162,27 +185,15 @@ int user_get_steamlevel()
 int get_user_type()
 	Returns: INVALID|YOU|USER
 
-String get_rich_presence( String key )
-* bool set_rich_presence( String key, String value )
-	Rich Presence data is automatically shared between friends who are in the same game
-	Each user has a set of Key/Value pairs
-	Up to 20 different keys can be set
-	There are two magic keys:
-			"status"  - string that will show up in the 'view game info' dialog in the Steam friends list
-			"connect" - string that contains the command-line for how a friend can connect to a game
-	get_rich_presence() returns an empty string "" if no value is set
-	set_rich_presence() using empty string "" deletes the key.
+String get_game_info( String key )
+	Retrieves value paired to given key.
 
-* bool clear_rich_presence()
-	Deletes all your rich_presence data.
+void request_game_info()
+	If user is in the same game, this is not needed, as the info is synced automatically.
+	Requests info about user's game. Emits "gameinfo_loaded" when done.
 
-** bool is_friend()
+bool is_friend()
 	Checks if this user is on your friend list.
-
-* bool is_logged() - probably will get moved to `Steam`
-	Returns true if the Steam client current has a live connection to the Steam servers.
-	If false, it means there is no active connection due to either a networking issue on the local machine, or the Steam server is down/busy.
-	The Steam client will automatically be trying to recreate the connection as often as possible.
 ```
 SteamGroup (SteamID)
 ```
