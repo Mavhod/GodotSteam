@@ -6,6 +6,7 @@
 #include "dictionary.h" // contains array.h as well
 #include "gsteamuser.h"
 #include "gsteamgroup.h"
+#include "gsteamstats.h"
 
 
 class Steam: public Object
@@ -57,6 +58,7 @@ protected:
 	void updateGroupList();
 
 private:
+	uint64 fixedAppID=0;
 	STEAM_CALLBACK(Steam,_server_connected,SteamServersConnected_t);
 	STEAM_CALLBACK(Steam,_server_disconnected,SteamServersDisconnected_t);
 	STEAM_CALLBACK(Steam,_overlay_toggled,GameOverlayActivated_t);
@@ -72,6 +74,6 @@ private:
 	OBJ_TYPE(Steam, Object);
 	OBJ_CATEGORY("Steam");
 };
-#endif // GODOTSTEAM_H
+#endif
 
 

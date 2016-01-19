@@ -48,11 +48,9 @@ protected:
 	int user_type=0;
 	void setUserType(int uType); // sets to INVALID if this type is undeclared
 	bool updateType(); // checks&update the type. Returns true if type changed. Mostly used when `cSteamID` changed
-	// void _game_info_received( FriendRichPresenceUpdate_t* rich_update );
 	static void _bind_methods();
 
 private:
-	void _steamid_changed() { updateType(); }
 	Image draw_avatar(int size, uint8* buffer);
 	OBJ_TYPE(_SteamUser, SteamID);
 	

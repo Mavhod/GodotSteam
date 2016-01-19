@@ -57,13 +57,15 @@ void SteamID::_bind_methods()
 	//ObjectTypeDB::bind_method(_MD("get_rich_presence","key"),&SteamID::get_rich_presence);
 	
 	ObjectTypeDB::bind_method("is_valid",&SteamID::is_valid);
-	ObjectTypeDB::bind_method("get_steamID",&SteamID::get_steamID);
-	ObjectTypeDB::bind_method("get_accountID",&SteamID::get_accountID);
+	ObjectTypeDB::bind_method("get_id",&SteamID::get_steamID);
+	ObjectTypeDB::bind_method("get_account_id",&SteamID::get_accountID);
 	ObjectTypeDB::bind_method("get_account_type",&SteamID::get_account_type);
 	ObjectTypeDB::bind_method("get_universe",&SteamID::get_universe);
 	
 	ObjectTypeDB::bind_method("get_profile_url",&SteamID::get_profile_url);
 	//BIND_VMETHOD(MethodInfo(Variant::STRING,"get_name"));
+	
+	// ADD_SIGNAL(MethodInfo("steamid_changed"));
 	
 	BIND_CONSTANT(UNIVERSE_INVALID);
 	BIND_CONSTANT(UNIVERSE_PUBLIC);

@@ -5,7 +5,7 @@
 _SteamUser::_SteamUser(CSteamID cSID)
 {
 	setCSteamID( cSID );
-	// _steamid_changed() => updateType() = try to find its type
+	updateType();
 }
 
 bool _SteamUser::updateType()
@@ -116,7 +116,7 @@ void _SteamUser::request_game_info()
 void _SteamUser::_game_info_received( FriendRichPresenceUpdate_t* rich_update )
 {
 	if ( rich_update->m_steamIDFriend == getCSteamID() )
-		emit_signal("rich_presence_rec");
+		emit_signal("gameinfo_loaded");
 }
 
 Image _SteamUser::draw_avatar(int iSize, uint8* iBuffer) 
@@ -237,10 +237,9 @@ void _SteamUser::_bind_methods()
 	ObjectTypeDB::bind_method(_MD("get_game_info","key"),&_SteamUser::get_game_info);
 	ObjectTypeDB::bind_method(_MD("request_game_info"),&_SteamUser::request_game_info);
 	ObjectTypeDB::bind_method("is_friend",&_SteamUser::is_friend);
-	// ObjectTypeDB::bind_method("is_logged",&_SteamUser::is_logged);
 	// ObjectTypeDB::bind_method(_MD("get_relationship"),&_SteamUser::get_relationship);
 	
-	ADD_SIGNAL(MethodInfo("rpresence_updated"));
+	ADD_SIGNAL(MethodInfo("gameinfo_loaded"));
 	ADD_SIGNAL(MethodInfo("avatar_loaded",PropertyInfo(Variant::INT,"size"),PropertyInfo(Variant::IMAGE,"avatar")));
 	
 	BIND_CONSTANT(INVALID);

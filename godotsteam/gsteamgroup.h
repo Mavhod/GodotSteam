@@ -27,7 +27,6 @@ protected:
 	static void _bind_methods();
 
 private:
-	void _steamid_changed() {}
 	OBJ_TYPE(_SteamGroup, SteamID);
 };
 #endif

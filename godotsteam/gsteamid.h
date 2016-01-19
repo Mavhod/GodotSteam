@@ -24,8 +24,8 @@ public:
 	SteamID(uint64 steamID) { setID(steamID); }
 	
 	CSteamID getCSteamID() { return cSteamID; } // return copy
-	void setCSteamID( CSteamID cSID ) { cSteamID=cSID; _steamid_changed(); }
-	void setID( uint64 steamid ) { cSteamID.SetFromUint64(steamid); _steamid_changed(); }
+	void setCSteamID( CSteamID cSID ) { cSteamID=cSID; }
+	void setID( uint64 steamid ) { cSteamID.SetFromUint64(steamid); }
 	
 	// GDScript
 	bool is_valid();
@@ -43,7 +43,6 @@ protected:
 	OBJ_CATEGORY("Steam");
 
 private:
-	virtual void _steamid_changed()=0;
 	OBJ_TYPE(SteamID, Reference);
 };
 #endif
