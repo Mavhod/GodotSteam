@@ -16,6 +16,14 @@ def configure(env):
 		elif env["bits"]=="64":
 			env.Append(RPATH=env.Literal('\\$$ORIGIN/linux64'))
 			env.Append(LIBPATH=["#modules/godotsteam/sdk/redistributable_bin/linux64"])
+		
+	# experimental mac support by Gramps
+	# check https://github.com/Gramps/GodotSteam
+	elif env["platform"] == "osx":
+		env.Append(LIBS=["steam_api"])
+		env.Append(RPATH=env.Literal('\\$$ORIGIN'))
+		env.Append(LIBPATH=["#modules/godotsteam/sdk/redistributable_bin/osx32"])
+	# ----
 	elif env["platform"] == "windows":
 		steamlib = "steam_api"
 		steamlib_path = "#modules/godotsteam/sdk/redistributable_bin"
