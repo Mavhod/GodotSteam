@@ -292,6 +292,7 @@ void SteamUC::_bind_methods()
 	
 	ADD_SIGNAL(MethodInfo("connection_changed",PropertyInfo(Variant::BOOL,"connected")));
 	ADD_SIGNAL(MethodInfo("overlay_toggled",PropertyInfo(Variant::BOOL,"active")));
+	ADD_SIGNAL(MethodInfo("join_requested",PropertyInfo(Variant::INT,"from"),PropertyInfo(Variant::STRING,"connect_string")));
 	
 	BIND_CONSTANT(TOP_LEFT);
 	BIND_CONSTANT(TOP_RIGHT);

@@ -62,7 +62,7 @@ How to use
 
 API Reference
 -------------
-Updated reference will be added soon, with new example.
+[Click HERE](API_REFERENCE.md)
 
 License
 -------------
