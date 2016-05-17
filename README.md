@@ -60,9 +60,12 @@ How to use
   ./godot_binary.exe
   ```
 
-API Reference
+#[API Reference](API_REFERENCE.md)
+-------------  
+  
+Functions Overview
 -------------
-[Click HERE](API_REFERENCE.md)
+![](http://i133.photobucket.com/albums/q50/95seba/Godot%20Others/func_overview.png)
 
 License
 -------------
