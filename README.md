@@ -1,8 +1,6 @@
 # GodotSteam
 Steam api for Godot game engine.
 
-For Windows and Linux platform.
-
 APIs for steam I will add it later.
 
 How to use
@@ -35,7 +33,9 @@ How to use
   For Linux you must add ```openssl=no``` when compile because it has problem with lib crypto (class StreamPeerSSL may can't use).
   
   For Windows you can only compile with Visual C++ can't use MINGW because *.lib is exclusive for Microsoft compiler.
-
+  
+  OSX has 32 bit only because Steam is not make shared library (libsteam_api.dylib) 64bit version.
+  
 - Copy shared library (steam_api) to godot binary place, should look like this:
 
   Linux 32
@@ -60,6 +60,12 @@ How to use
   ```
   ./steam_api64.dll
   ./godot_binary.exe
+  ```
+  
+  OSX 32
+  ```
+  ./libsteam_api.dylib
+  ./godot_binary
   ```
 
 API Reference
