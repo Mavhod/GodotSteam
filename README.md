@@ -1,5 +1,5 @@
 # GodotSteam
-Steam api for Godot game engine.
+Steam api for Godot2.
 
 APIs for steam I will add it later.
 
@@ -34,8 +34,6 @@ How to use
   
   For Windows you can only compile with Visual C++ can't use MINGW because *.lib is exclusive for Microsoft compiler.
   
-  OSX has 32 bit only because Steam is not make shared library (libsteam_api.dylib) 64bit version.
-  
 - Copy shared library (steam_api) to godot binary place, should look like this:
 
   Linux 32
@@ -62,7 +60,7 @@ How to use
   ./godot_binary.exe
   ```
   
-  OSX 32
+  OSX
   ```
   ./libsteam_api.dylib
   ./godot_binary
@@ -73,6 +71,40 @@ API Reference
 ```
 bool init()
 If success return true.
+
+
+bool cloudIsEnabledForAccount()
+
+bool cloudIsEnabledForApp()
+
+uint32_t cloudGetCount()
+
+Dictionary cloudGetFileNameAndSize( int iFile )
+iFile: Index of file
+Return dictionary members: fileName, fileSize
+
+bool cloudFileWrite( const String &pchFile, const Variant &pvData )
+pchFile: File name
+pvData: Data for written
+
+Variant cloudFileRead( const String &pchFile )
+pchFile: File name
+Return data read
+
+bool cloudFileDelete( const String &pchFile )
+pchFile: File name
+
+
+uint32_t achievementsGetNum()
+
+String achievementGetName( uint32_t iAchievement )
+
+bool achievementSet( const String &pchName )
+
+Dictionary achievementGet( const String &pchName )
+Return dictionary members: isSuccessGet, isAchieved
+
+bool achievementClear( const String &pchName )
 ```
 
 License
